@@ -8,6 +8,16 @@ import logging
 import requests
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import voluptuous as vol
+from telegram import Bot
+from telegram.utils.request import Request
+from telegram.parsemode import ParseMode
+from telegram.error import TelegramError
+from telegram import (
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
 
 from homeassistant.components.notify import ATTR_DATA, ATTR_MESSAGE, ATTR_TITLE
 from homeassistant.const import (
@@ -375,9 +385,6 @@ async def async_setup(hass, config):
 
 def initialize_bot(p_config):
     """Initialize telegram bot with proxy support."""
-    from telegram import Bot
-    from telegram.utils.request import Request
-
     api_key = p_config.get(CONF_API_KEY)
     proxy_url = p_config.get(CONF_PROXY_URL)
     proxy_params = p_config.get(CONF_PROXY_PARAMS)
@@ -396,8 +403,6 @@ class TelegramNotificationService:
 
     def __init__(self, hass, bot, allowed_chat_ids, parser):
         """Initialize the service."""
-        from telegram.parsemode import ParseMode
-
         self.allowed_chat_ids = allowed_chat_ids
         self._default_user = self.allowed_chat_ids[0]
         self._last_message_id = {user: None for user in self.allowed_chat_ids}
@@ -457,8 +462,6 @@ class TelegramNotificationService:
               - a string like: `/cmd1, /cmd2, /cmd3`
               - or a string like: `text_b1:/cmd1, text_b2:/cmd2`
             """
-            from telegram import InlineKeyboardButton
-
             buttons = []
             if isinstance(row_keyboard, str):
                 for key in row_keyboard.split(","):
@@ -507,8 +510,6 @@ class TelegramNotificationService:
                 params[ATTR_REPLY_TO_MSGID] = data[ATTR_REPLY_TO_MSGID]
             # Keyboards:
             if ATTR_KEYBOARD in data:
-                from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
-
                 keys = data.get(ATTR_KEYBOARD)
                 keys = keys if isinstance(keys, list) else [keys]
                 if keys:
@@ -518,8 +519,6 @@ class TelegramNotificationService:
                 else:
                     params[ATTR_REPLYMARKUP] = ReplyKeyboardRemove(True)
             elif ATTR_KEYBOARD_INLINE in data:
-                from telegram import InlineKeyboardMarkup
-
                 keys = data.get(ATTR_KEYBOARD_INLINE)
                 keys = keys if isinstance(keys, list) else [keys]
                 params[ATTR_REPLYMARKUP] = InlineKeyboardMarkup(
@@ -529,8 +528,6 @@ class TelegramNotificationService:
 
     def _send_msg(self, func_send, msg_error, *args_msg, **kwargs_msg):
         """Send one message."""
-        from telegram.error import TelegramError
-
         try:
             out = func_send(*args_msg, **kwargs_msg)
             if not isinstance(out, bool) and hasattr(out, ATTR_MESSAGEID):

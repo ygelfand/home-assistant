@@ -88,9 +88,7 @@ class TelegramNotificationService(BaseNotificationService):
             )
 
         # Send message
-        _LOGGER.debug(
-            "TELEGRAM NOTIFIER calling %s.send_message with %s", DOMAIN, service_data
-        )
+        _LOGGER.debug("Calling %s.send_message with %s", DOMAIN, service_data)
         return self.hass.services.call(
             DOMAIN, "send_message", service_data=service_data
         )
