@@ -26,7 +26,7 @@ RtmAPI==0.7.2
 YesssSMS==0.4.1
 
 # homeassistant.components.abode
-abodepy==0.16.6
+abodepy==0.16.7
 
 # homeassistant.components.androidtv
 adb-shell==0.0.8
@@ -546,7 +546,7 @@ rxv==0.6.0
 samsungctl[websocket]==0.7.1
 
 # homeassistant.components.simplisafe
-simplisafe-python==5.0.1
+simplisafe-python==5.1.0
 
 # homeassistant.components.sleepiq
 sleepyq==0.7
