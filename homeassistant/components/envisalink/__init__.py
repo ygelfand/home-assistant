@@ -2,6 +2,7 @@
 import asyncio
 import logging
 
+from pyenvisalink import EnvisalinkAlarmPanel
 import voluptuous as vol
 
 from homeassistant.core import callback
@@ -110,7 +111,6 @@ SERVICE_SCHEMA = vol.Schema(
 
 async def async_setup(hass, config):
     """Set up for Envisalink devices."""
-    from pyenvisalink import EnvisalinkAlarmPanel
 
     conf = config.get(DOMAIN)
 

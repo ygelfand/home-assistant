@@ -1,7 +1,7 @@
 {
     "config": {
-        "error": {
-            "identifier_exists": "Lokalizacja ju\u017c zarejestrowana"
+        "abort": {
+            "already_configured": "Lokalizacja jest ju\u017c skonfigurowana."
         },
         "step": {
             "user": {
@@ -9,9 +9,8 @@
                     "mmi": "MMI",
                     "radius": "Promie\u0144"
                 },
-                "title": "Wype\u0142nij szczeg\u00f3\u0142y dotycz\u0105ce filtra."
+                "title": "Wprowad\u017a szczeg\u00f3\u0142owe dane filtra."
             }
-        },
-        "title": "GeoNet NZ Quakes"
+        }
     }
 }

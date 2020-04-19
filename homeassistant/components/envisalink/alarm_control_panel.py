@@ -3,7 +3,16 @@ import logging
 
 import voluptuous as vol
 
-import homeassistant.components.alarm_control_panel as alarm
+from homeassistant.components.alarm_control_panel import (
+    FORMAT_NUMBER,
+    AlarmControlPanel,
+)
+from homeassistant.components.alarm_control_panel.const import (
+    SUPPORT_ALARM_ARM_AWAY,
+    SUPPORT_ALARM_ARM_HOME,
+    SUPPORT_ALARM_ARM_NIGHT,
+    SUPPORT_ALARM_TRIGGER,
+)
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     STATE_ALARM_ARMED_AWAY,
@@ -25,6 +34,7 @@ from . import (
     CONF_PARTITIONNAME,
     CONF_CODE_ARM_REQUIRED,
     DATA_EVL,
+    DOMAIN,
     PARTITION_SCHEMA,
     SIGNAL_KEYPAD_UPDATE,
     SIGNAL_PARTITION_UPDATE,
@@ -33,7 +43,7 @@ from . import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SERVICE_ALARM_KEYPRESS = "envisalink_alarm_keypress"
+SERVICE_ALARM_KEYPRESS = "alarm_keypress"
 ATTR_KEYPRESS = "keypress"
 ALARM_KEYPRESS_SCHEMA = vol.Schema(
     {
@@ -86,7 +96,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             device.async_alarm_keypress(keypress)
 
     hass.services.async_register(
-        alarm.DOMAIN,
+        DOMAIN,
         SERVICE_ALARM_KEYPRESS,
         alarm_keypress_handler,
         schema=ALARM_KEYPRESS_SCHEMA,
@@ -95,7 +105,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     return True
 
 
-class EnvisalinkAlarm(EnvisalinkDevice, alarm.AlarmControlPanel):
+class EnvisalinkAlarm(EnvisalinkDevice, AlarmControlPanel):
     """Representation of an Envisalink-based alarm panel."""
 
     def __init__(
@@ -124,16 +134,22 @@ class EnvisalinkAlarm(EnvisalinkDevice, alarm.AlarmControlPanel):
 
     async def async_added_to_hass(self):
         """Register callbacks."""
-        async_dispatcher_connect(self.hass, SIGNAL_KEYPAD_UPDATE, self._update_callback)
-        async_dispatcher_connect(
-            self.hass, SIGNAL_PARTITION_UPDATE, self._update_callback
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass, SIGNAL_KEYPAD_UPDATE, self._update_callback
+            )
+        )
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass, SIGNAL_PARTITION_UPDATE, self._update_callback
+            )
         )
 
     @callback
     def _update_callback(self, partition):
         """Update Home Assistant state, if needed."""
         if partition is None or int(partition) == self._partition_number:
-            self.async_schedule_update_ha_state()
+            self.async_write_ha_state()
 
     @property
     def device_state_attributes(self):
@@ -152,7 +168,7 @@ class EnvisalinkAlarm(EnvisalinkDevice, alarm.AlarmControlPanel):
         """Regex for code format or None if no code is required."""
         if self._code:
             return None
-        return alarm.FORMAT_NUMBER
+        return FORMAT_NUMBER
 
     @property
     def code_arm_required(self):
@@ -184,6 +200,16 @@ class EnvisalinkAlarm(EnvisalinkDevice, alarm.AlarmControlPanel):
             self._previous_state = STATE_ALARM_DISARMED
             state = STATE_ALARM_DISARMED
         return state
+
+    @property
+    def supported_features(self) -> int:
+        """Return the list of supported features."""
+        return (
+            SUPPORT_ALARM_ARM_HOME
+            | SUPPORT_ALARM_ARM_AWAY
+            | SUPPORT_ALARM_ARM_NIGHT
+            | SUPPORT_ALARM_TRIGGER
+        )
 
     async def async_alarm_disarm(self, code=None):
         """Send disarm command."""

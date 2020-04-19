@@ -6,10 +6,10 @@
         "step": {
             "user": {
                 "data": {
+                    "password": "Palavra-passe",
                     "username": "Endere\u00e7o de e-mail"
                 }
             }
-        },
-        "title": ""
+        }
     }
 }
