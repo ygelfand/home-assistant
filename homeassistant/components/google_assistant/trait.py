@@ -1,5 +1,6 @@
 """Implement the Google Smart Home traits."""
 import logging
+import asyncio
 
 from homeassistant.components import (
     alarm_control_panel,
@@ -1012,8 +1013,7 @@ class ArmDisArmTrait(_Trait):
         else:
             armed_state = self.state.state
         response = {"isArmed": armed_state in self.state_to_service}
-        if response["isArmed"]:
-            response.update({"currentArmLevel": armed_state})
+        response.update({"currentArmLevel": armed_state})
         if exit_delay:
             response.update({"exitAllowance": exit_delay})
         return response
@@ -1051,6 +1051,7 @@ class ArmDisArmTrait(_Trait):
             context=data.context,
         )
 
+        await asyncio.sleep(3)
 
 @register_trait
 class FanSpeedTrait(_Trait):
